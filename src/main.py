@@ -1,5 +1,5 @@
-from scraper import fetch_page_content
+from scraper import build_index
 
 if __name__ == "__main__":
-    homePage = fetch_page_content("https://savvydefi.io/")
-    print(homePage)
+    index = build_index()
+    print(index)

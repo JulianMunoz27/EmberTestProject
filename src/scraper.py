@@ -32,42 +32,48 @@ def scrape_home_page():
     except Exception as error:
         print(error)
 
-#scrape the document from savvydefi
-def scrape_docs_page(doc_url):
-    try:
-        soup = fetch_page_content(doc_url)
-
-        doc_page_data = {
-            "url": doc_url,
-            "title": soup.title.string if soup.title else "",
-            #uncomment in case the contents are required
-            #"content": soup.get_text()
-        }
-
-        return doc_page_data
-    except Exception as error:
-        print(error)
-
 #check all the documents to scrape
 def scrape_all_docs():
     try:
-        home_url = "https://savvydefi.io/"
-        soup = fetch_page_content(home_url)
+        base_url = "https://docs.savvydefi.io/"
+        soup = fetch_page_content(base_url)
+
+        if not soup:
+            print("Failed to fetch page content.")
+            return []
 
         docs_links = []
-        for a_tag in soup.find_all('a', href=True):
-            href = a_tag['href']
-            if "docs" in href: 
-                full_url = href if href.startswith("http") else home_url + href
+        for a_tag in soup.find_all('a', class_=lambda x: x and 'flex flex-row justify-between pl-5' in x):
+            href = a_tag.get('href')
+            if href:
+                if href.startswith('/'):
+                    full_url = base_url.rstrip('/') + href
+                elif not href.startswith('http'):
+                    full_url = base_url.rstrip('/') + '/' + href
+                else:
+                    full_url = href
                 docs_links.append(full_url)
-        
-        docs_data = [scrape_docs_page(doc_url) for doc_url in docs_links]
-        
+
+        docs_data = []
+        for doc_url in docs_links:
+            doc_soup = fetch_page_content(doc_url)
+            if doc_soup:
+                doc_title = doc_soup.title.string if doc_soup.title else ""
+                doc_data = {
+                    "url": doc_url,
+                    "title": doc_title,
+                    # You can add more fields like content if needed
+                }
+                docs_data.append(doc_data)
+
+            else:
+                print("Failed to fetch content")
+
         return docs_data
     except Exception as error:
         print(error)
 
-#get the results of the scraping of the home page and the documents section
+#get the results of the scraping text in home page and the documents section
 def build_index():
     index = {
         "home_page": scrape_home_page(),

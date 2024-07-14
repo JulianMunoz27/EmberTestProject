@@ -62,7 +62,7 @@ def scrape_all_docs():
                 doc_data = {
                     "url": doc_url,
                     "title": doc_title,
-                    # You can add more fields like content if needed
+                    #"content": doc_soup.get_text() #uncomment this if the content of the page is required
                 }
                 docs_data.append(doc_data)
 
